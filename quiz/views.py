@@ -30,7 +30,6 @@ def signup(request):
     else:
         form = SignUpForm()
     return render(request, 'quiz/signup.html', {'form': form})
-
 @login_required
 def question_list(request):
     now = timezone.now()
@@ -47,12 +46,8 @@ def question_list(request):
 
     for event in events:
         questions = event.questions.filter(
-            is_open=True
-        ).filter(
-            Q(start_time__isnull=True) |
-            Q(start_time__gt=now)
-        ).filter(
-            start_time__date=today  # ← only today's matches
+            is_open=True,
+            start_time__date=today
         ).exclude(
             useranswer__user=request.user
         ).order_by('start_time').prefetch_related('choices')
