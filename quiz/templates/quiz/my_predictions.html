@@ -18,19 +18,44 @@
     margin-bottom: 16px;
     box-shadow: 0 3px 12px rgba(159,161,255,0.1);
 ">
-    <p style="font-size:0.75rem; color:#aaa; margin-bottom:6px;">
+    <!-- Event & Match Time -->
+    <p style="font-size:0.75rem; color:#aaa; margin-bottom:4px;">
         🏆 {{ answer.question.event.name }}
     </p>
 
-    <p style="font-weight:700; color:#333; font-size:1rem; margin-bottom:12px;">
+    {% if answer.question.start_time %}
+    <p style="font-size:0.75rem; color:#aaa; margin-bottom:8px;">
+        🕐 Match time: {{ answer.question.start_time|date:"d M Y, H:i" }} (UTC+3)
+    </p>
+    {% endif %}
+
+    <!-- Question Title -->
+    <p style="font-weight:700; color:#333; font-size:1rem; margin-bottom:8px; padding-bottom:10px; border-bottom: 1px solid #eee;">
         ❓ {{ answer.question.title }}
     </p>
 
+    <!-- All options/teams -->
+    <p style="font-size:0.8rem; color:#888; margin-bottom:12px;">
+        Options:
+        {% for choice in answer.question.choices.all %}
+            <span style="
+                background:#f0f0ff;
+                border: 1px solid #B5BAFF;
+                border-radius:6px;
+                padding: 2px 8px;
+                margin-right:4px;
+                color:#4647AE;
+            ">{{ choice.text }}</span>
+        {% endfor %}
+    </p>
+
+    <!-- User's pick -->
     <p style="margin-bottom:6px;">
         <span style="font-size:0.85rem; color:#666;">Your pick:</span>
         <strong style="color:#4647AE;">{{ answer.choice.text }}</strong>
     </p>
 
+    <!-- Result -->
     {% if answer.question.correct_choice %}
         <p style="margin-bottom:6px;">
             <span style="font-size:0.85rem; color:#666;">Correct answer:</span>
@@ -45,9 +70,11 @@
         <p style="color:#aaa; font-size:0.85rem; margin-top:8px;">⏳ Result not available yet</p>
     {% endif %}
 
+    <!-- Submitted time -->
     <p style="font-size:0.75rem; color:#bbb; margin-top:10px;">
         Submitted: {{ answer.submitted_at|date:"d M Y, H:i" }}
     </p>
+
 </div>
 {% endfor %}
 
