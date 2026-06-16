@@ -1,0 +1,54 @@
+{% extends 'quiz/base.html' %}
+{% block content %}
+<h2>📋 My Predictions</h2>
+
+{% if not answers %}
+    <div style="text-align:center; padding:48px 0;">
+        <p style="font-size:2rem;">📭</p>
+        <p style="color:#4647AE; font-weight:600;">You haven't submitted any predictions yet.</p>
+    </div>
+{% endif %}
+
+{% for answer in answers %}
+<div style="
+    background: white;
+    border: 2px solid {% if answer.question.correct_choice %}{% if answer.is_correct %}#4CAF50{% else %}#FF5252{% endif %}{% else %}#B5BAFF{% endif %};
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 3px 12px rgba(159,161,255,0.1);
+">
+    <p style="font-size:0.75rem; color:#aaa; margin-bottom:6px;">
+        🏆 {{ answer.question.event.name }}
+    </p>
+
+    <p style="font-weight:700; color:#333; font-size:1rem; margin-bottom:12px;">
+        ❓ {{ answer.question.title }}
+    </p>
+
+    <p style="margin-bottom:6px;">
+        <span style="font-size:0.85rem; color:#666;">Your pick:</span>
+        <strong style="color:#4647AE;">{{ answer.choice.text }}</strong>
+    </p>
+
+    {% if answer.question.correct_choice %}
+        <p style="margin-bottom:6px;">
+            <span style="font-size:0.85rem; color:#666;">Correct answer:</span>
+            <strong style="color:#333;">{{ answer.question.correct_choice.text }}</strong>
+        </p>
+        {% if answer.is_correct %}
+            <p style="color:#4CAF50; font-weight:700; margin-top:8px;">✅ Correct!</p>
+        {% else %}
+            <p style="color:#FF5252; font-weight:700; margin-top:8px;">❌ Wrong</p>
+        {% endif %}
+    {% else %}
+        <p style="color:#aaa; font-size:0.85rem; margin-top:8px;">⏳ Result not available yet</p>
+    {% endif %}
+
+    <p style="font-size:0.75rem; color:#bbb; margin-top:10px;">
+        Submitted: {{ answer.submitted_at|date:"d M Y, H:i" }}
+    </p>
+</div>
+{% endfor %}
+
+{% endblock %}
