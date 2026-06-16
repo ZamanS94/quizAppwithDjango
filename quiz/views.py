@@ -30,10 +30,10 @@ def signup(request):
     else:
         form = SignUpForm()
     return render(request, 'quiz/signup.html', {'form': form})
+
 @login_required
 def question_list(request):
-    now = timezone.now()
-    today = now.date()
+    now = timezone.now()  # this is UTC
 
     answered_ids = set(
         UserAnswer.objects.filter(
@@ -41,14 +41,22 @@ def question_list(request):
         ).values_list('question_id', flat=True)
     )
 
+    # Get today's date range in UTC+3
+    from datetime import timedelta
+    from django.utils.timezone import localtime
+    local_now = localtime(now)
+    local_today_start = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+    local_today_end = local_today_start + timedelta(days=1)
+
     events = Event.objects.filter(is_active=True)
     event_data = []
 
     for event in events:
         questions = event.questions.filter(
             is_open=True,
-            start_time__date=today,
-            start_time__gt=now        # ← only future kickoffs today
+            start_time__gte=local_today_start,  # from midnight today
+            start_time__lt=local_today_end,      # until midnight tomorrow
+            start_time__gt=now                   # not yet started
         ).exclude(
             useranswer__user=request.user
         ).order_by('start_time').prefetch_related('choices')
