@@ -47,7 +47,8 @@ def question_list(request):
     for event in events:
         questions = event.questions.filter(
             is_open=True,
-            start_time__date=today
+            start_time__date=today,
+            start_time__gt=now        # ← only future kickoffs today
         ).exclude(
             useranswer__user=request.user
         ).order_by('start_time').prefetch_related('choices')
