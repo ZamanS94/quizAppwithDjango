@@ -31,10 +31,10 @@ def signup(request):
         form = SignUpForm()
     return render(request, 'quiz/signup.html', {'form': form})
 
-
 @login_required
 def question_list(request):
     now = timezone.now()
+    today = now.date()
 
     answered_ids = set(
         UserAnswer.objects.filter(
@@ -51,6 +51,8 @@ def question_list(request):
         ).filter(
             Q(start_time__isnull=True) |
             Q(start_time__gt=now)
+        ).filter(
+            start_time__date=today  # ← only today's matches
         ).exclude(
             useranswer__user=request.user
         ).order_by('start_time').prefetch_related('choices')
