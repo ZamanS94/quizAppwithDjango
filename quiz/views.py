@@ -12,6 +12,10 @@ import math
 from .models import Event, Question, Choice, UserAnswer, Profile
 from .forms import SignUpForm
 
+from django.http import HttpResponse
+
+def ping(request):
+    return HttpResponse("ok")
 
 def signup(request):
     if request.user.is_authenticated:
