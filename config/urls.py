@@ -7,4 +7,5 @@ urlpatterns = [
     path('', include('quiz.urls')),
     path('login/', auth_views.LoginView.as_view(template_name='quiz/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('ping/', views.ping, name='ping'),
 ]
