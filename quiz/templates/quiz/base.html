@@ -260,5 +260,13 @@
     </div>
 
 </div>
+<script>
+    // Ping the server every 14 minutes to prevent free instance spin-down
+    setInterval(function() {
+        fetch('/ping/', { method: 'GET' })
+            .catch(function() {});  // silently ignore errors
+    }, 14 * 60 * 1000);  // 14 minutes in milliseconds
+</script>
 </body>
+</html>
 </html>
