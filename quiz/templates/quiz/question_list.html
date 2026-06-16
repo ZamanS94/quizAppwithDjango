@@ -2,113 +2,93 @@
 {% block content %}
 <h2>⚽ Match Predictions</h2>
 
-{% for event in events %}
+{% if not event_data %}
+    <div style="text-align:center; padding:48px 0;">
+        <p style="font-size:2.5rem;">⚽</p>
+        <p style="font-size:1.1rem; margin-top:10px; color:#4647AE; font-weight:600;">
+            No open predictions right now.
+        </p>
+        <p style="font-size:0.88rem; margin-top:6px; color:#888;">
+            Check back when the next match is coming up!
+        </p>
+    </div>
+{% endif %}
+
+{% for item in event_data %}
 <div style="margin-bottom: 36px;">
+
     <h3 style="
-        background: linear-gradient(135deg, #112E81, #4647AE);
+        background: linear-gradient(135deg, #9FA1FF, #AEE2FF);
         color: white;
         padding: 12px 20px;
         border-radius: 10px;
         margin-bottom: 20px;
         font-size: 1rem;
         letter-spacing: 1px;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.15);
     ">
-        🏆 {{ event.name }}
+        🏆 {{ item.event.name }}
     </h3>
 
-    {% for question in event.questions.all %}
-        {% if question.is_open %}
-            {% if question.id in answered_ids %}
-                <div style="
-                    background: #e8f5e9;
-                    border-radius: 12px;
-                    padding: 18px 22px;
-                    margin-bottom: 14px;
-                    border-left: 5px solid #28a745;
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                ">
-                    <span style="font-size: 1.4rem;">✅</span>
-                    <div>
-                        <p style="font-weight: 700; color: #1e6b34;">{{ question.title }}</p>
-                        <p style="font-size: 0.82rem; color: #555; margin-top: 2px;">Answer submitted — good luck!</p>
-                    </div>
-                </div>
-            {% else %}
-                <div style="
-                    background: white;
-                    border: 2px solid #AACCD6;
-                    border-radius: 14px;
-                    padding: 24px;
-                    margin-bottom: 20px;
-                    box-shadow: 0 3px 12px rgba(17,46,129,0.1);
-                    transition: box-shadow 0.2s;
-                ">
-                    <form method="post" action="/submit/{{ question.id }}/">
-                        {% csrf_token %}
-                        <p style="
-                            font-weight: 700;
-                            color: #112E81;
-                            font-size: 1.05rem;
-                            margin-bottom: 18px;
-                            padding-bottom: 12px;
-                            border-bottom: 2px solid #AACCD6;
-                        ">
-                            ❓ {{ question.title }}
-                        </p>
+    {% for question in item.questions %}
+        <div style="
+            background: white;
+            border: 2px solid #B5BAFF;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 12px rgba(159,161,255,0.15);
+        ">
+            <form method="post" action="/submit/{{ question.id }}/">
+                {% csrf_token %}
 
-                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                            {% for choice in question.choices.all %}
-                            <label style="
-                                display: flex;
-                                align-items: center;
-                                gap: 12px;
-                                padding: 13px 18px;
-                                border: 2px solid #AACCD6;
-                                border-radius: 10px;
-                                cursor: pointer;
-                                font-weight: 500;
-                                color: #333;
-                                background: #f9fbfc;
-                                transition: all 0.2s;
-                            "
-                            onmouseover="this.style.borderColor='#4382DF'; this.style.background='#eef4fd'; this.style.color='#112E81';"
-                            onmouseout="this.style.borderColor='#AACCD6'; this.style.background='#f9fbfc'; this.style.color='#333';">
-                                <input type="radio" name="choice" value="{{ choice.id }}" required
-                                       style="width:18px; height:18px; accent-color: #4382DF; flex-shrink:0;">
-                                <span style="font-size: 0.97rem;">{{ choice.text }}</span>
-                            </label>
-                            {% endfor %}
-                        </div>
+                <p style="
+                    font-weight: 700;
+                    color: #333;
+                    font-size: 1.05rem;
+                    margin-bottom: 6px;
+                    padding-bottom: 12px;
+                    border-bottom: 2px solid #B5BAFF;
+                ">
+                    ❓ {{ question.title }}
+                </p>
 
-                        <button type="submit" class="btn">⚽ Submit Prediction</button>
-                    </form>
+                {% if question.start_time %}
+                <p style="font-size:0.8rem; color:#888; margin-bottom:14px; margin-top:6px;">
+                    🕐 Closes at {{ question.start_time|date:"H:i" }} (UTC+3)
+                </p>
+                {% endif %}
+
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; margin-top:14px;">
+                    {% for choice in question.choices.all %}
+                    <label style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 13px 18px;
+                        border: 2px solid #B5BAFF;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        font-weight: 500;
+                        color: #333;
+                        background: #fafafe;
+                        transition: all 0.2s;
+                    "
+                    onmouseover="this.style.borderColor='#9FA1FF'; this.style.background='#f0f0ff'; this.style.color='#333';"
+                    onmouseout="this.style.borderColor='#B5BAFF'; this.style.background='#fafafe'; this.style.color='#333';">
+                        <input type="radio" name="choice" value="{{ choice.id }}" required
+                               style="width:18px; height:18px; accent-color:#9FA1FF; flex-shrink:0;">
+                        <span style="font-size:0.97rem;">{{ choice.text }}</span>
+                    </label>
+                    {% endfor %}
                 </div>
-            {% endif %}
-        {% else %}
-            <div style="
-                background: #f0f0f0;
-                border-radius: 12px;
-                padding: 16px 22px;
-                margin-bottom: 12px;
-                color: #888;
-                border-left: 5px solid #ccc;
-            ">
-                🔒 <strong>{{ question.title }}</strong>
-                <span style="font-size:0.82rem; margin-left:8px;">Predictions closed</span>
-            </div>
-        {% endif %}
+
+                <button type="submit" class="btn">⚽ Submit Prediction</button>
+            </form>
+        </div>
     {% endfor %}
+
 </div>
 {% endfor %}
-
-{% if not events %}
-    <div style="text-align:center; padding: 48px 0; color: #AACCD6;">
-        <p style="font-size: 2rem;">⚽</p>
-        <p style="font-size: 1.1rem; margin-top: 10px; color: #4647AE;">No active predictions right now.</p>
-        <p style="font-size: 0.88rem; margin-top: 6px;">Check back soon!</p>
-    </div>
-{% endif %}
 
 {% endblock %}
