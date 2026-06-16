@@ -1,9 +1,17 @@
+# quiz/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from .models import Event, Question, UserAnswer, Profile
-from django.contrib.auth import login
+from django.db import models
+from django.db.models import Q
+from django.utils import timezone
+from django.http import Http404
+import math
+
+from .models import Event, Question, Choice, UserAnswer, Profile
 from .forms import SignUpForm
+
 
 def signup(request):
     if request.user.is_authenticated:
@@ -22,16 +30,39 @@ def signup(request):
 
 @login_required
 def question_list(request):
-    events = Event.objects.filter(is_active=True).prefetch_related('questions__choices')
-    answered_ids = UserAnswer.objects.filter(user=request.user).values_list('question_id', flat=True)
+    now = timezone.now()
+
+    answered_ids = set(
+        UserAnswer.objects.filter(
+            user=request.user
+        ).values_list('question_id', flat=True)
+    )
+
+    events = Event.objects.filter(is_active=True)
+    event_data = []
+
+    for event in events:
+        questions = event.questions.filter(
+            is_open=True
+        ).filter(
+            Q(start_time__isnull=True) |
+            Q(start_time__gt=now)
+        ).exclude(
+            useranswer__user=request.user
+        ).prefetch_related('choices')
+
+        if questions.exists():
+            event_data.append({
+                'event': event,
+                'questions': questions,
+            })
+
     return render(request, 'quiz/question_list.html', {
-        'events': events,
-        'answered_ids': set(answered_ids),
+        'event_data': event_data,
+        'answered_ids': answered_ids,
     })
 
-from django.http import Http404
 
-@login_required
 @login_required
 def submit_answer(request, question_id):
     try:
@@ -49,8 +80,6 @@ def submit_answer(request, question_id):
             messages.error(request, "Please select an answer.")
             return redirect('question_list')
 
-        from .models import Choice, UserAnswer
-
         choice = get_object_or_404(Choice, pk=choice_id, question=question)
 
         _, created = UserAnswer.objects.get_or_create(
@@ -58,17 +87,14 @@ def submit_answer(request, question_id):
             question=question,
             defaults={'choice': choice}
         )
+
         if created:
-            messages.success(request, "Prediction submitted!")
+            messages.success(request, "✅ Prediction submitted!")
         else:
             messages.warning(request, "You already submitted a prediction for this match.")
 
     return redirect('question_list')
 
-
-from .models import Event, Profile
-import math
-from .models import Profile, Event
 
 def leaderboard(request):
     profiles = Profile.objects.select_related('user')
@@ -79,25 +105,28 @@ def leaderboard(request):
             questions__useranswer__user=p.user
         ).distinct().values_list('name', flat=True)
 
+        total = p.total_resolved_answers
+        correct = p.correct_answers
+        accuracy = round((correct / total * 100), 1) if total > 0 else 0
+        score = round(accuracy * math.log(total + 1), 3) if total > 0 else 0
+
         data.append({
             'username': p.user.username,
             'points': p.points,
-            'correct': p.correct_answers,
-            'total': p.total_resolved_answers,
-            'accuracy': round(p.accuracy * 100, 1),
-            'score': round(p.score, 3),
-            'events': ", ".join(user_events) if user_events else "",
+            'correct': correct,
+            'total': total,
+            'accuracy': accuracy,
+            'score': score,
+            'events': ", ".join(user_events) if user_events else "—",
         })
 
     data.sort(key=lambda x: x['score'], reverse=True)
 
-    # NEW: all events that have at least one open question
     open_events = Event.objects.filter(
         questions__is_open=True
     ).distinct().values_list('name', flat=True)
 
-    return render(
-        request,
-        'quiz/leaderboard.html',
-        {'data': data, 'open_events': open_events}
-    )
+    return render(request, 'quiz/leaderboard.html', {
+        'data': data,
+        'open_events': open_events,
+    })
