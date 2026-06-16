@@ -66,6 +66,18 @@ def question_list(request):
         'answered_ids': answered_ids,
     })
 
+@login_required
+def my_predictions(request):
+    answers = UserAnswer.objects.filter(
+        user=request.user
+    ).select_related(
+        'question', 'question__event', 'choice', 'question__correct_choice'
+    ).order_by('-submitted_at')
+
+    return render(request, 'quiz/my_predictions.html', {
+        'answers': answers,
+    })
+
 
 @login_required
 def submit_answer(request, question_id):
