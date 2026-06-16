@@ -1,0 +1,29 @@
+{% extends 'quiz/base.html' %}
+{% block content %}
+<div style="max-width: 420px; margin: 0 auto;">
+    <h2>Login</h2>
+
+    <p style="font-size:0.9rem; color:#555; margin-bottom:16px;">
+        Welcome back! Enter your details to join the World Cup predictions.
+    </p>
+
+    <form method="post" style="display:flex; flex-direction:column; gap:10px;">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+            <div>
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div style="color:#c0392b; font-size:0.8rem;">{{ field.errors|striptags }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn" style="width:100%; margin-top:8px;">
+            Login
+        </button>
+    </form>
+</div>
+{% endblock %}

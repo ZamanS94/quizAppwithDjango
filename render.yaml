@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: quiz-app
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quiz-db
+          property: connectionString
+
+  - type: cron
+    name: close-started-questions
+    env: python
+    schedule: "*/5 * * * *"        # every 5 minutes (UTC)
+    buildCommand: "./build.sh"
+    startCommand: "python manage.py close_started_questions"
+
+databases:
+  - name: quiz-db
+    databaseName: quizdb
+    user: quizuser

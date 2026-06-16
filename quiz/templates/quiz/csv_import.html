@@ -1,0 +1,14 @@
+{% extends 'quiz/base.html' %}
+{% block content %}
+<h2>Import Questions from CSV</h2>
+<p>CSV format: <code>question,option1,option2,option3,option4,start_time</code></p>
+<p style="font-size:0.85rem; color:#555;">
+    Example start_time: <code>2026-06-20 18:00</code> (UTC+3).
+    Leave empty to keep question open until admin closes it.
+</p>
+<form method="post" enctype="multipart/form-data" style="margin-top:16px;">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Import</button>
+</form>
+{% endblock %}
