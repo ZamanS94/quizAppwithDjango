@@ -53,7 +53,7 @@ def question_list(request):
             Q(start_time__gt=now)
         ).exclude(
             useranswer__user=request.user
-        ).prefetch_related('choices')
+        ).order_by('start_time').prefetch_related('choices')
 
         if questions.exists():
             event_data.append({
