@@ -229,6 +229,7 @@
         <div class="nav-links">
             <a href="/questions/">Predictions</a>
             <a href="/leaderboard/">Leaderboard</a>
+            <a href="{% url 'my_predictions' %}">My Predictions</a>
         </div>
         <div class="nav-user">
             {% if user.is_authenticated %}
