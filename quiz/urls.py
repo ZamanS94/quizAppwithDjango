@@ -8,5 +8,5 @@ urlpatterns = [
     path('leaderboard/', views.leaderboard, name='leaderboard'),
     path('signup/', views.signup, name='signup'),
     path('my-predictions/', views.my_predictions, name='my_predictions'),
-    path('votes/<int:question_id>/', views.match_votes, name='match_votes'),
+    path('votes/', views.match_votes, name='match_votes'),
 ]

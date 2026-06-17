@@ -145,20 +145,22 @@ def leaderboard(request):
 
     return render(request, 'quiz/leaderboard.html', {'data': data})
 
+def match_votes(request):
+    questions = Question.objects.prefetch_related('choices').order_by('-created_at')
 
-def match_votes(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    choices = question.choices.all()
-    total = UserAnswer.objects.filter(question=question).count()
+    all_votes = []
+    for question in questions:
+        total = UserAnswer.objects.filter(question=question).count()
+        vote_data = []
+        for choice in question.choices.all():
+            count = UserAnswer.objects.filter(question=question, choice=choice).count()
+            pct = round(count / total * 100, 1) if total > 0 else 0
+            vote_data.append({'choice': choice.text, 'count': count, 'pct': pct})
 
-    vote_data = []
-    for choice in choices:
-        count = UserAnswer.objects.filter(question=question, choice=choice).count()
-        pct = round(count / total * 100, 1) if total > 0 else 0
-        vote_data.append({'choice': choice.text, 'count': count, 'pct': pct})
+        all_votes.append({
+            'question': question,
+            'vote_data': vote_data,
+            'total': total,
+        })
 
-    return render(request, 'quiz/match_votes.html', {
-        'question': question,
-        'vote_data': vote_data,
-        'total': total,
-    })
+    return render(request, 'quiz/match_votes.html', {'all_votes': all_votes})

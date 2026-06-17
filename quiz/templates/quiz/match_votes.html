@@ -1,26 +1,31 @@
 {% extends 'quiz/base.html' %}
 {% block content %}
+<h2>📊 Match Votes</h2>
 
-<h2>{{ question.title }}</h2>
-<p style="color:#888;">Total predictions: {{ total }}</p>
+{% for item in all_votes %}
+<div style="background:white; border-radius:12px; padding:20px; margin-bottom:24px; box-shadow:0 3px 10px rgba(17,46,129,0.08);">
+    <h3 style="margin-bottom:4px;">{{ item.question.title }}</h3>
+    <p style="color:#888; font-size:0.85rem; margin-bottom:16px;">{{ item.total }} prediction{{ item.total|pluralize }}</p>
 
-{% if total == 0 %}
-  <p>No predictions yet.</p>
-{% else %}
-  {% for v in vote_data %}
-  <div style="margin-bottom:20px;">
-    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-      <strong>{{ v.choice }}</strong>
-      <span>{{ v.count }} votes — {{ v.pct }}%</span>
-    </div>
-    <div style="background:#eee; border-radius:6px; height:24px; width:100%;">
-      <div style="background:#4CAF50; width:{{ v.pct }}%; height:100%; border-radius:6px; transition:width 0.3s;"></div>
-    </div>
-  </div>
-  {% endfor %}
+    {% if item.total == 0 %}
+        <p style="color:#aaa;">No predictions yet.</p>
+    {% else %}
+        {% for v in item.vote_data %}
+        <div style="margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <strong style="color:#112E81;">{{ v.choice }}</strong>
+                <span style="color:#4647AE; font-size:0.9rem;">{{ v.count }} votes — {{ v.pct }}%</span>
+            </div>
+            <div style="background:#eee; border-radius:6px; height:20px; width:100%;">
+                <div style="--w:{{ v.pct }}%; background:linear-gradient(90deg,#4647AE,#4382DF); width:var(--w); height:100%; border-radius:6px; transition:width 0.3s;"></div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endfor %}
+
+{% if not all_votes %}
+    <p style="text-align:center; color:#aaa; padding:40px 0;">No matches yet.</p>
 {% endif %}
-
-<br>
-
-
 {% endblock %}

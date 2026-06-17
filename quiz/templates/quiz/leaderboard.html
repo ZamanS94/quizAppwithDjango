@@ -2,7 +2,6 @@
 {% block content %}
 <h2>🏆 Leaderboard</h2>
 <h3 style="margin-top:8px; margin-bottom:16px; color:#4647AE; font-size:1rem;">
-   
     {% if open_events %}
         {% for ev in open_events %}
             {{ ev }}{% if not forloop.last %}, {% endif %}
@@ -12,10 +11,8 @@
     {% endif %}
 </h3>
 
-
 <style>
     .lb-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-
     .lb-table thead th {
         background: #112E81;
         color: #AACCD6;
@@ -28,7 +25,6 @@
     .lb-table thead th:first-child { border-radius: 10px 0 0 10px; }
     .lb-table thead th:last-child  { border-radius: 0 10px 10px 0; }
     .lb-table thead th.left { text-align: left; }
-
     .lb-table tbody td {
         background: white;
         padding: 18px 20px;
@@ -39,12 +35,10 @@
     .lb-table tbody td:first-child { border-radius: 12px 0 0 12px; }
     .lb-table tbody td:last-child  { border-radius: 0 12px 12px 0; background: #eef2fb; }
     .lb-table tbody td.left { text-align: left; }
-
     .rank-1 { background: linear-gradient(135deg, #112E81, #4647AE) !important; color: white !important; font-size: 1.3rem; font-weight: 800; }
     .rank-2 { background: #4647AE !important; color: white !important; font-size: 1.3rem; font-weight: 800; }
     .rank-3 { background: #4382DF !important; color: white !important; font-size: 1.3rem; font-weight: 800; }
     .rank-other { color: #112E81; font-size: 1rem; font-weight: 700; }
-
     .accuracy-bar-bg {
         background: #AACCD6;
         border-radius: 20px;
@@ -57,12 +51,10 @@
         background: linear-gradient(90deg, #4647AE, #4382DF);
         border-radius: 20px;
         height: 8px;
-        width: 0%;
         transition: width 0.8s ease;
     }
     .accuracy-label { font-size: 0.85rem; font-weight: 600; color: #4647AE; }
     .points-val { font-weight: 800; font-size: 1.1rem; color: #4382DF; }
-    .score-val  { font-weight: 700; color: #112E81; }
     .username   { font-weight: 700; font-size: 1rem; color: #112E81; }
 </style>
 
@@ -76,14 +68,11 @@
             <th>✅ CORRECT</th>
             <th>TOTAL</th>
             <th>ACCURACY</th>
-            <th>SCORE</th>
-
         </tr>
     </thead>
     <tbody>
         {% for row in data %}
         <tr>
-
             {% if forloop.counter == 1 %}
                 <td class="rank-1">🥇</td>
             {% elif forloop.counter == 2 %}
@@ -93,23 +82,16 @@
             {% else %}
                 <td class="rank-other">{{ forloop.counter }}</td>
             {% endif %}
-
             <td class="left username">{{ row.username }}</td>
             <td class="points-val">{{ row.points }}</td>
             <td>{{ row.correct }}</td>
             <td>{{ row.total }}</td>
-
             <td style="min-width: 130px;">
                 <div class="accuracy-bar-bg">
-                    <div class="accuracy-bar-fill"
-                         data-width="{{ row.accuracy }}">
-                    </div>
+                    <div class="accuracy-bar-fill" data-width="{{ row.accuracy }}"></div>
                 </div>
                 <span class="accuracy-label">{{ row.accuracy }}%</span>
             </td>
-
-            <td class="score-val">{{ row.score }}</td>
- 
         </tr>
         {% endfor %}
     </tbody>
@@ -127,9 +109,7 @@
 
 <script>
     document.querySelectorAll('.accuracy-bar-fill').forEach(function(bar) {
-        var width = bar.getAttribute('data-width');
-        bar.style.width = width + '%';
+        bar.style.width = bar.getAttribute('data-width') + '%';
     });
 </script>
-
 {% endblock %}

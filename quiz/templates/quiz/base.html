@@ -230,7 +230,7 @@
             <a href="/questions/">Predictions</a>
             <a href="/leaderboard/">Leaderboard</a>
             <a href="{% url 'my_predictions' %}">My Predictions</a>
-            <a href="/votes/">Match Votes</a>
+            <a href="{% url 'match_votes' %}">Votes</a>
         </div>
         <div class="nav-user">
             {% if user.is_authenticated %}
