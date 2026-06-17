@@ -83,7 +83,9 @@
                     {% endfor %}
                 </div>
 
-                <!-- GOAL PREDICTIONS with team names -->
+                <!-- GOAL PREDICTIONS - team names extracted from choices -->
+                {% with choices=question.choices.all %}
+                {% with home_choice=choices.0 away_choice=choices.1 %}
                 <div style="
                     background: #f0f0ff;
                     border: 2px solid #B5BAFF;
@@ -96,17 +98,19 @@
                     </p>
                     <div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
                         <label style="font-weight:600; color:#112E81; display:flex; align-items:center; gap:8px; margin-bottom:0;">
-                            ⚽ {{ question.home_team|default:"Home" }}:
+                            ⚽ {{ home_choice.text|cut:" Win"|cut:" win"|cut:" WIN" }}:
                             <input type="number" name="predicted_home_goals" min="0" max="20"
                                    style="width:64px; padding:8px; border:2px solid #B5BAFF; border-radius:8px; font-size:1rem; text-align:center; margin-bottom:0;">
                         </label>
                         <label style="font-weight:600; color:#112E81; display:flex; align-items:center; gap:8px; margin-bottom:0;">
-                            ⚽ {{ question.away_team|default:"Away" }}:
+                            ⚽ {{ away_choice.text|cut:" Win"|cut:" win"|cut:" WIN" }}:
                             <input type="number" name="predicted_away_goals" min="0" max="20"
                                    style="width:64px; padding:8px; border:2px solid #B5BAFF; border-radius:8px; font-size:1rem; text-align:center; margin-bottom:0;">
                         </label>
                     </div>
                 </div>
+                {% endwith %}
+                {% endwith %}
 
                 <button type="submit" class="btn">⚽ Submit Prediction</button>
             </form>

@@ -152,7 +152,7 @@ def leaderboard(request):
     })
 
 def match_votes(request):
-    questions = Question.objects.prefetch_related('choices').order_by('-start_time')
+    questions = Question.objects.prefetch_related('choices').order_by('start_time')
 
     all_votes = []
     for question in questions:
