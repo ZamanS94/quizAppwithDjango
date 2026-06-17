@@ -1,21 +1,17 @@
-# quiz/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from django.db import models
-from django.db.models import Q
 from django.utils import timezone
-from django.http import Http404
-import math
+from django.http import Http404, HttpResponse
 
 from .models import Event, Question, Choice, UserAnswer, Profile
 from .forms import SignUpForm
 
-from django.http import HttpResponse
 
 def ping(request):
     return HttpResponse("ok")
+
 
 def signup(request):
     if request.user.is_authenticated:
@@ -31,9 +27,16 @@ def signup(request):
         form = SignUpForm()
     return render(request, 'quiz/signup.html', {'form': form})
 
+
 @login_required
 def question_list(request):
-    now = timezone.now()  # this is UTC
+    now = timezone.now()
+    from datetime import timedelta
+    from django.utils.timezone import localtime
+
+    local_now = localtime(now)
+    local_today_start = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+    local_today_end = local_today_start + timedelta(days=1)
 
     answered_ids = set(
         UserAnswer.objects.filter(
@@ -41,22 +44,15 @@ def question_list(request):
         ).values_list('question_id', flat=True)
     )
 
-    # Get today's date range in UTC+3
-    from datetime import timedelta
-    from django.utils.timezone import localtime
-    local_now = localtime(now)
-    local_today_start = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
-    local_today_end = local_today_start + timedelta(days=1)
-
     events = Event.objects.filter(is_active=True)
     event_data = []
 
     for event in events:
         questions = event.questions.filter(
             is_open=True,
-            start_time__gte=local_today_start,  # from midnight today
-            start_time__lt=local_today_end,      # until midnight tomorrow
-            start_time__gt=now                   # not yet started
+            start_time__gte=local_today_start,
+            start_time__lt=local_today_end,
+            start_time__gt=now
         ).exclude(
             useranswer__user=request.user
         ).order_by('start_time').prefetch_related('choices')
@@ -71,6 +67,7 @@ def question_list(request):
         'event_data': event_data,
         'answered_ids': answered_ids,
     })
+
 
 @login_required
 def my_predictions(request):
@@ -104,10 +101,23 @@ def submit_answer(request, question_id):
 
         choice = get_object_or_404(Choice, pk=choice_id, question=question)
 
+        def parse_goals(val):
+            try:
+                return int(val)
+            except (TypeError, ValueError):
+                return None
+
+        predicted_home = parse_goals(request.POST.get("predicted_home_goals"))
+        predicted_away = parse_goals(request.POST.get("predicted_away_goals"))
+
         _, created = UserAnswer.objects.get_or_create(
             user=request.user,
             question=question,
-            defaults={'choice': choice}
+            defaults={
+                'choice': choice,
+                'predicted_home_goals': predicted_home,
+                'predicted_away_goals': predicted_away,
+            }
         )
 
         if created:
@@ -123,32 +133,32 @@ def leaderboard(request):
 
     data = []
     for p in profiles:
-        user_events = Event.objects.filter(
-            questions__useranswer__user=p.user
-        ).distinct().values_list('name', flat=True)
-
-        total = p.total_resolved_answers
-        correct = p.correct_answers
-        accuracy = round((correct / total * 100), 1) if total > 0 else 0
-        score = round(accuracy * math.log(total + 1), 3) if total > 0 else 0
-
         data.append({
             'username': p.user.username,
-            'points': p.points,
-            'correct': correct,
-            'total': total,
-            'accuracy': accuracy,
-            'score': score,
-            'events': ", ".join(user_events) if user_events else "—",
+            'points': round(p.points, 2),
+            'correct': p.correct_answers,
+            'total': p.total_resolved_answers,
+            'accuracy': p.accuracy,
         })
 
-    data.sort(key=lambda x: x['score'], reverse=True)
+    data.sort(key=lambda x: x['points'], reverse=True)
 
-    open_events = Event.objects.filter(
-        questions__is_open=True
-    ).distinct().values_list('name', flat=True)
+    return render(request, 'quiz/leaderboard.html', {'data': data})
 
-    return render(request, 'quiz/leaderboard.html', {
-        'data': data,
-        'open_events': open_events,
+
+def match_votes(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    choices = question.choices.all()
+    total = UserAnswer.objects.filter(question=question).count()
+
+    vote_data = []
+    for choice in choices:
+        count = UserAnswer.objects.filter(question=question, choice=choice).count()
+        pct = round(count / total * 100, 1) if total > 0 else 0
+        vote_data.append({'choice': choice.text, 'count': count, 'pct': pct})
+
+    return render(request, 'quiz/match_votes.html', {
+        'question': question,
+        'vote_data': vote_data,
+        'total': total,
     })

@@ -1,0 +1,26 @@
+{% extends 'quiz/base.html' %}
+{% block content %}
+
+<h2>{{ question.title }}</h2>
+<p style="color:#888;">Total predictions: {{ total }}</p>
+
+{% if total == 0 %}
+  <p>No predictions yet.</p>
+{% else %}
+  {% for v in vote_data %}
+  <div style="margin-bottom:20px;">
+    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+      <strong>{{ v.choice }}</strong>
+      <span>{{ v.count }} votes — {{ v.pct }}%</span>
+    </div>
+    <div style="background:#eee; border-radius:6px; height:24px; width:100%;">
+      <div style="background:#4CAF50; width:{{ v.pct }}%; height:100%; border-radius:6px; transition:width 0.3s;"></div>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<br>
+
+
+{% endblock %}

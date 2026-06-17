@@ -1,7 +1,6 @@
-# quiz/models.py
 from django.db import models
 from django.contrib.auth.models import User
-import math
+
 
 class Event(models.Model):
     name = models.CharField(max_length=200)
@@ -21,9 +20,10 @@ class Question(models.Model):
     )
     is_open = models.BooleanField(default=True)
     is_scored = models.BooleanField(default=False)
-    # NEW: kickoff time in UTC+3 (optional)
     start_time = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    actual_home_goals = models.IntegerField(null=True, blank=True)
+    actual_away_goals = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.title
@@ -43,7 +43,9 @@ class UserAnswer(models.Model):
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
     submitted_at = models.DateTimeField(auto_now_add=True)
     is_correct = models.BooleanField(null=True)
-    points_awarded = models.IntegerField(default=0)
+    points_awarded = models.FloatField(default=0)
+    predicted_home_goals = models.IntegerField(null=True, blank=True)
+    predicted_away_goals = models.IntegerField(null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -53,7 +55,7 @@ class UserAnswer(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    points = models.IntegerField(default=0)
+    points = models.FloatField(default=0)
     correct_answers = models.IntegerField(default=0)
     total_resolved_answers = models.IntegerField(default=0)
 
@@ -61,11 +63,7 @@ class Profile(models.Model):
     def accuracy(self):
         if self.total_resolved_answers == 0:
             return 0
-        return self.correct_answers / self.total_resolved_answers
-
-    @property
-    def score(self):
-        return self.accuracy * math.log(self.total_resolved_answers + 1)
+        return round(self.correct_answers / self.total_resolved_answers * 100, 1)
 
     def __str__(self):
         return f"{self.user.username} profile"
