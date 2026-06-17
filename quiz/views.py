@@ -143,10 +143,16 @@ def leaderboard(request):
 
     data.sort(key=lambda x: x['points'], reverse=True)
 
-    return render(request, 'quiz/leaderboard.html', {'data': data})
+    # ✅ fixed: get all active events
+    open_events = Event.objects.filter(is_active=True).values_list('name', flat=True)
+
+    return render(request, 'quiz/leaderboard.html', {
+        'data': data,
+        'open_events': open_events,
+    })
 
 def match_votes(request):
-    questions = Question.objects.prefetch_related('choices').order_by('-created_at')
+    questions = Question.objects.prefetch_related('choices').order_by('-start_time')
 
     all_votes = []
     for question in questions:
@@ -164,3 +170,6 @@ def match_votes(request):
         })
 
     return render(request, 'quiz/match_votes.html', {'all_votes': all_votes})
+
+def points_info(request):
+    return render(request, 'quiz/points_info.html')

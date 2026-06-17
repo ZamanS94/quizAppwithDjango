@@ -9,4 +9,5 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('my-predictions/', views.my_predictions, name='my_predictions'),
     path('votes/', views.match_votes, name='match_votes'),
+    path('how-points-work/', views.points_info, name='points_info'),
 ]

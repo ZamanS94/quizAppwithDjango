@@ -1,0 +1,65 @@
+{% extends 'quiz/base.html' %}
+{% block content %}
+<h2>ℹ️ How Points Work</h2>
+
+<div style="background:white; border-radius:12px; padding:28px; margin-bottom:24px; box-shadow:0 3px 10px rgba(17,46,129,0.08);">
+    <h3 style="margin-bottom:16px;">⚽ Per Match — Max 3 pts</h3>
+
+    <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+        <thead>
+            <tr style="background:#112E81; color:white;">
+                <th style="padding:12px 16px; text-align:left; border-radius:8px 0 0 8px;">Prediction</th>
+                <th style="padding:12px 16px; text-align:center; border-radius:0 8px 8px 0;">Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:12px 16px;">✅ Correct winner / draw</td>
+                <td style="padding:12px 16px; text-align:center; font-weight:700; color:#4382DF;">1.00</td>
+            </tr>
+            <tr style="border-bottom:1px solid #eee; background:#f9f9f9;">
+                <td style="padding:12px 16px;">🎯 Exact goals (per team)</td>
+                <td style="padding:12px 16px; text-align:center; font-weight:700; color:#4382DF;">1.00</td>
+            </tr>
+            <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:12px 16px;">📏 Off by 1 goal (per team)</td>
+                <td style="padding:12px 16px; text-align:center; font-weight:700; color:#4382DF;">0.75</td>
+            </tr>
+            <tr style="border-bottom:1px solid #eee; background:#f9f9f9;">
+                <td style="padding:12px 16px;">📏 Off by 2 goals (per team)</td>
+                <td style="padding:12px 16px; text-align:center; font-weight:700; color:#4382DF;">0.50</td>
+            </tr>
+            <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:12px 16px;">📏 Off by 3 goals (per team)</td>
+                <td style="padding:12px 16px; text-align:center; font-weight:700; color:#4382DF;">0.25</td>
+            </tr>
+            <tr style="background:#f9f9f9;">
+                <td style="padding:12px 16px;">❌ Off by 4+ goals (per team)</td>
+                <td style="padding:12px 16px; text-align:center; font-weight:700; color:#ccc;">0.00</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div style="background:white; border-radius:12px; padding:28px; margin-bottom:24px; box-shadow:0 3px 10px rgba(17,46,129,0.08);">
+    <h3 style="margin-bottom:12px;">📌 Example</h3>
+    <p style="color:#555; line-height:1.8;">
+        Match: <strong>Argentina vs Australia</strong> — Final score: <strong>2 - 1</strong><br>
+        You predicted: <strong>Argentina wins, 2 - 2</strong><br><br>
+        ✅ Correct winner → <strong>1.00 pt</strong><br>
+        🎯 Argentina goals exact (2=2) → <strong>1.00 pt</strong><br>
+        📏 Australia goals off by 1 (2 vs 1) → <strong>0.75 pt</strong><br><br>
+        <strong style="color:#4382DF; font-size:1.1rem;">Total: 2.75 pts</strong>
+    </p>
+</div>
+
+<div style="background:white; border-radius:12px; padding:28px; box-shadow:0 3px 10px rgba(17,46,129,0.08);">
+    <h3 style="margin-bottom:12px;">🏆 Leaderboard</h3>
+    <p style="color:#555; line-height:1.8;">
+        Rankings are based on <strong>total points</strong> only.<br>
+        Accuracy shows what percentage of your winner/draw predictions were correct.<br>
+        One prediction per match — choose wisely! 🎯
+    </p>
+</div>
+
+{% endblock %}
