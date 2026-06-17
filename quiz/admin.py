@@ -30,16 +30,14 @@ class QuestionAdmin(admin.ModelAdmin):
     actions = ['score_questions']
 
     def score_questions(self, request, queryset):
-        """
-        For each selected question:
-        - Award 10 points per correct answer
-        - Mark answers as correct/incorrect
-        - Update Profile aggregates
-        - Close and mark question as scored
-        """
         for question in queryset:
             if not question.correct_choice:
                 self.message_user(request, f"'{question.title}' has no correct choice set. Skipped.")
+                continue
+
+            # ✅ Skip already scored questions
+            if question.is_scored:
+                self.message_user(request, f"'{question.title}' already scored. Skipped.")
                 continue
 
             answers = UserAnswer.objects.filter(question=question).select_related('user__profile')
@@ -63,11 +61,10 @@ class QuestionAdmin(admin.ModelAdmin):
             question.is_open = False
             question.save()
 
-        self.message_user(request, "Questions scored successfully.")
+        self.message_user(request, "✅ Questions scored successfully.")
 
-    score_questions.short_description = "Score selected questions"
+    score_questions.short_description = "⚽ Score selected questions"
 
-    # Only show this question's choices as valid correct_choice options
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         if obj:
@@ -104,7 +101,6 @@ class EventAdmin(admin.ModelAdmin):
                 helsinki = pytz.timezone("Europe/Helsinki")
 
                 for row in reader:
-                    # Parse start_time as Helsinki local time if present
                     start_time_str = row.get('start_time')
                     start_time = None
                     if start_time_str and start_time_str.strip():
