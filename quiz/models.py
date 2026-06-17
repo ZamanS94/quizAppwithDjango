@@ -24,6 +24,8 @@ class Question(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     actual_home_goals = models.IntegerField(null=True, blank=True)
     actual_away_goals = models.IntegerField(null=True, blank=True)
+    home_team = models.CharField(max_length=100, blank=True, default='')
+    away_team = models.CharField(max_length=100, blank=True, default='')
 
     def __str__(self):
         return self.title

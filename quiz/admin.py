@@ -24,20 +24,15 @@ def goal_points(actual, predicted):
     if actual is None or predicted is None:
         return 0
     deviation = abs(actual - predicted)
-    if deviation == 0:
-        return 1
-    elif deviation == 1:
-        return 0.75
-    elif deviation == 2:
-        return 0.5
-    elif deviation == 3:
-        return 0.25
-    else:
-        return 0
+    if deviation == 0: return 1
+    elif deviation == 1: return 0.75
+    elif deviation == 2: return 0.5
+    elif deviation == 3: return 0.25
+    else: return 0
 
 
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['title', 'event', 'is_open', 'is_scored', 'start_time', 'correct_choice', 'actual_home_goals', 'actual_away_goals']
+    list_display = ['title', 'event', 'is_open', 'is_scored', 'start_time', 'correct_choice', 'home_team', 'away_team', 'actual_home_goals', 'actual_away_goals']
     inlines = [ChoiceInline]
     actions = ['score_questions']
 
@@ -126,7 +121,9 @@ class EventAdmin(admin.ModelAdmin):
                     q = Question.objects.create(
                         event=event,
                         title=row['question'],
-                        start_time=start_time
+                        start_time=start_time,
+                        home_team=row.get('home_team', '').strip(),
+                        away_team=row.get('away_team', '').strip(),
                     )
 
                     for key in ['option1', 'option2', 'option3', 'option4']:
