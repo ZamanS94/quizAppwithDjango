@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 pip install -r requirements.txt
 python manage.py migrate
+python manage.py score_questions
 python manage.py shell -c "
 from django.contrib.auth.models import User
 import os
