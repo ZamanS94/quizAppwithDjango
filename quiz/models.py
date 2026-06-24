@@ -22,8 +22,8 @@ class Question(models.Model):
     is_scored = models.BooleanField(default=False)
     start_time = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    actual_home_goals = models.IntegerField(null=True, blank=True)
-    actual_away_goals = models.IntegerField(null=True, blank=True)
+    actual_home_goals = models.IntegerField(null=True, blank=True, verbose_name="Goals — option 1 team (home)")
+    actual_away_goals = models.IntegerField(null=True, blank=True, verbose_name="Goals — option 2 team (away)")
     home_team = models.CharField(max_length=100, blank=True, default='')
     away_team = models.CharField(max_length=100, blank=True, default='')
 
