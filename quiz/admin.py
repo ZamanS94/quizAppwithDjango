@@ -137,6 +137,60 @@ class EventAdmin(admin.ModelAdmin):
         return render(request, 'quiz/csv_import.html', {'form': form})
 
 
+def rescore_questions(self, request, queryset):
+    for question in queryset:
+        if not question.correct_choice:
+            self.message_user(request, f"'{question.title}' has no correct choice set. Skipped.")
+            continue
+
+        # ✅ reset first
+        answers = UserAnswer.objects.filter(question=question).select_related('user__profile')
+        for answer in answers:
+            profile, _ = Profile.objects.get_or_create(user=answer.user)
+            # subtract old points
+            profile.points -= answer.points_awarded
+            if answer.is_correct:
+                profile.correct_answers -= 1
+            profile.total_resolved_answers -= 1
+            profile.save()
+
+            answer.points_awarded = 0
+            answer.is_correct = None
+            answer.save()
+
+        question.is_scored = False
+        question.save()
+
+        # ✅ now rescore with new logic
+        answers = UserAnswer.objects.filter(question=question).select_related('user__profile')
+        for answer in answers:
+            profile, _ = Profile.objects.get_or_create(user=answer.user)
+            profile.total_resolved_answers += 1
+
+            winner_points = 1 if answer.choice == question.correct_choice else 0
+            if winner_points:
+                profile.correct_answers += 1
+                answer.is_correct = True
+            else:
+                answer.is_correct = False
+
+            home_pts = goal_points(question.actual_home_goals, answer.predicted_home_goals)
+            away_pts = goal_points(question.actual_away_goals, answer.predicted_away_goals)
+
+            total_points = winner_points + home_pts + away_pts
+            answer.points_awarded = total_points
+            profile.points += total_points
+
+            answer.save()
+            profile.save()
+
+        question.is_scored = True
+        question.save()
+
+    self.message_user(request, "✅ Questions rescored successfully.")
+
+rescore_questions.short_description = "🔄 Rescore selected questions (reset + rescore)"
+
 admin.site.register(Event, EventAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Choice)

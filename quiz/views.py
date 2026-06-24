@@ -27,16 +27,12 @@ def signup(request):
         form = SignUpForm()
     return render(request, 'quiz/signup.html', {'form': form})
 
-
 @login_required
 def question_list(request):
     now = timezone.now()
     from datetime import timedelta
-    from django.utils.timezone import localtime
 
-    local_now = localtime(now)
-    local_today_start = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
-    local_today_end = local_today_start + timedelta(days=1)
+    window_end = now + timedelta(hours=12)
 
     answered_ids = set(
         UserAnswer.objects.filter(
@@ -50,9 +46,8 @@ def question_list(request):
     for event in events:
         questions = event.questions.filter(
             is_open=True,
-            start_time__gte=local_today_start,
-            start_time__lt=local_today_end,
-            start_time__gt=now
+            start_time__gt=now,          # not yet started
+            start_time__lte=window_end,  # within next 12 hours
         ).exclude(
             useranswer__user=request.user
         ).order_by('start_time').prefetch_related('choices')
@@ -67,7 +62,6 @@ def question_list(request):
         'event_data': event_data,
         'answered_ids': answered_ids,
     })
-
 
 @login_required
 def my_predictions(request):
@@ -152,15 +146,19 @@ def leaderboard(request):
     })
 
 def match_votes(request):
-    questions = Question.objects.prefetch_related('choices').order_by('start_time')
+    questions = Question.objects.prefetch_related('choices').order_by('-start_time')  # ✅ newest first
 
     all_votes = []
     for question in questions:
         total = UserAnswer.objects.filter(question=question).count()
+
+        if total == 0:  # ✅ skip questions with no votes
+            continue
+
         vote_data = []
         for choice in question.choices.all():
             count = UserAnswer.objects.filter(question=question, choice=choice).count()
-            pct = round(count / total * 100, 1) if total > 0 else 0
+            pct = round(count / total * 100, 1)
             vote_data.append({'choice': choice.text, 'count': count, 'pct': pct})
 
         all_votes.append({
